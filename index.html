@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Circle PWA">
+  
+  <title>Circle PWA</title>
+  
+  <!-- Manifest Link -->
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- Inline SVG Icon: Black background with a medium white filled circle -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' fill='%23000000'/><circle cx='256' cy='256' r='140' fill='%23ffffff'/></svg>">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' fill='%23000000'/><circle cx='256' cy='256' r='140' fill='%23ffffff'/></svg>">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background-color: #000000;
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 20px;
+    }
+    .icon-display {
+      width: 140px;
+      height: 140px;
+      background-color: #000000;
+      border-radius: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
+      margin-bottom: 24px;
+      border: 1px solid #222222;
+    }
+    .circle {
+      width: 70px;
+      height: 70px;
+      background-color: #ffffff;
+      border-radius: 50%;
+    }
+    h1 {
+      font-size: 1.8rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    p {
+      color: #888888;
+      font-size: 0.95rem;
+      max-width: 300px;
+      line-height: 1.4;
+      margin-bottom: 24px;
+    }
+    #install-btn {
+      display: none;
+      background-color: #ffffff;
+      color: #000000;
+      border: none;
+      padding: 12px 24px;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 24px;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    #install-btn:active {
+      transform: scale(0.96);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="icon-display">
+    <div class="circle"></div>
+  </div>
+
+  <h1>Circle App</h1>
+  <p>Install this Web App to your home screen for full-screen usage.</p>
+
+  <button id="install-btn">Install App</button>
+
+  <script>
+    // Register Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('Service Worker Registered'))
+          .catch(err => console.error('SW Registration Failed:', err));
+      });
+    }
+
+    // Handle PWA Installation Prompt
+    let deferredPrompt;
+    const installBtn = document.getElementById('install-btn');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBtn.style.display = 'inline-block';
+    });
+
+    installBtn.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          installBtn.style.display = 'none';
+        }
+        deferredPrompt = null;
+      }
+    });
+  </script>
+</body>
+</html>
